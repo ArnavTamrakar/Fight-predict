@@ -1,0 +1,83 @@
+# UFC Fighter Prediction System - Database Indexing Notes
+
+## Index Strategy for Fighter Search
+
+### Primary Indexes to Create:
+
+1. **Text Index (Fuzzy Search)**
+   ```javascript
+   db.fighters.createIndex({ "name": "text" })
+   ```
+   - Handles typos and partial matches
+   - Built-in relevance scoring
+   - Usage: `db.fighters.find({ $text: { $search: "alex pereira" } })`
+
+2. **Regular Index (Autocomplete)**
+   ```javascript
+   db.fighters.createIndex({ "name": 1 })
+   ```
+   - Fast prefix matching
+   - Perfect for autocomplete
+   - Usage: `db.fighters.find({ "name": /^alex/i })`
+
+3. **Compound Index (Filtered Search)**
+   ```javascript
+   db.fighters.createIndex({ "name": 1, "weight_class": 1 })
+   ```
+   - Search by name within weight class
+   - Prevents duplicate fighters
+   - Usage: `db.fighters.find({ "name": /^alex/i, "weight_class": "Light Heavyweight" })`
+
+### Performance Benefits:
+
+- **Without index**: Check all 10,000 fighters (50-100ms)
+- **With text index**: Check only relevant matches (2-5ms)
+- **With regular index**: Check only prefix group (0.5-2ms)
+- **Speed improvement**: 10-50x faster
+
+### Implementation Priority:
+
+**Phase 1 (Essential):**
+- Text index for fuzzy search
+- Regular index for autocomplete
+
+**Phase 2 (Enhanced):**
+- Compound index for filtered search
+- Weight class index
+
+**Phase 3 (Advanced):**
+- Reach index for range queries
+- Height index for filtering
+
+### Query Examples:
+
+```javascript
+// Fuzzy search with typos
+db.fighters.find({ $text: { $search: "alex pereira" } })
+
+// Autocomplete as user types
+db.fighters.find({ "name": /^alex/i }).limit(10)
+
+// Filtered search
+db.fighters.find({ 
+  "name": /^alex/i, 
+  "weight_class": "Light Heavyweight" 
+})
+```
+
+### Monitoring:
+
+```javascript
+// Check index usage
+db.fighters.find({ "name": /^alex/i }).explain("executionStats")
+
+// Check index statistics
+db.fighters.aggregate([{ $indexStats: {} }])
+```
+
+### Key Concept:
+Indexes group similar data together, reducing search time from O(n) to O(log n) by eliminating unnecessary checks and enabling binary search.
+
+---
+Created: 2025-01-20
+Purpose: Reminder for implementing fighter search optimization
