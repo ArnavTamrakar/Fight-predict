@@ -7,9 +7,11 @@ from sklearn.ensemble import RandomForestClassifier
 import xgboost as xgb
 import numpy as np
 import os
+from pathlib import Path
 
-# Path to your cleaned dataset
-DATA_PATH = r"D:\Programming\Python\ufc\ml-webapp\ml_service\data\cleaned_dataset.csv"
+# Path to your cleaned dataset (project-relative)
+ROOT = Path(__file__).resolve().parents[1]
+DATA_PATH = ROOT / "data" / "cleaned_dataset.csv"
 
 # Load dataset
 print("Loading dataset...")
@@ -128,7 +130,7 @@ def make_xgb():
         random_state=42,
         n_jobs=-1,
         scale_pos_weight=scale_pos_weight,
-    )
+    ) 
 
 models = {
     "LogisticRegression": make_lr,
@@ -169,8 +171,8 @@ for name in models.keys():
 # Save best by CV mean
 best_name = max(cv_results.keys(), key=lambda k: cv_results[k]["cv_mean"])
 best_model = fitted_models[best_name]
-BEST_PATH = os.path.join(r"D:\Programming\Python\ufc\ml-webapp\ml_service\models", "best_fight_model.pkl")
-joblib.dump(best_model, BEST_PATH)
+BEST_PATH = ROOT / "models" / "best_fight_model.pkl"
+joblib.dump(best_model, str(BEST_PATH))
 print(f"\nSaved best model ({best_name}) to {BEST_PATH}")
 
 # Save trained model to same project dir

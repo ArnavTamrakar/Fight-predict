@@ -50,3 +50,15 @@ Artifacts saved to `ml_service/models/`.
 ## Notes
 - Ensure the same scaler used during training is saved and loaded for inference.
 - Update XGBoost/scikit-learn versions if needed for your environment.
+
+## Machine learning accuracy report
+[EVAL-ONLY] Test accuracy: 0.5415
+              precision    recall  f1-score   support
+
+           0       0.54      0.54      0.54       793
+           1       0.54      0.54      0.54       797
+
+    accuracy                           0.54      1590
+   macro avg       0.54      0.54      0.54      1590
+weighted avg       0.54      0.54      0.54      1590
+
