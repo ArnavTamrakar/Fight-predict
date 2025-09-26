@@ -121,10 +121,12 @@ app.post('/predict', (req, res) => {
 
       console.log('Computed features:', features);
 
-      res.json({ success: true, features });
+      // res.json({ success: true, features });
     
       const mlResponse = await axios.post('http://localhost:8000/predict-array', { features });
       console.log(mlResponse.data);
+
+      res.json({ prediction: mlResponse.data });
 
     });
 });
