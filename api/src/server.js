@@ -119,7 +119,7 @@ app.post('/predict', (req, res) => {
         tdDefDiff
       ];
 
-      console.log('Computed features:', features);
+      console.log('Computed features are:', features);
 
       // res.json({ success: true, features });
     
