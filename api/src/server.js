@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import csv from 'csv-parser';
 import fs from 'fs';
 import path from 'path';
-
+import axios from 'axios';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -41,10 +41,19 @@ app.post('/predict', (req, res) => {
   fs.createReadStream('fighters.csv')
     .pipe(csv())
     .on('data', (row) => {
-      if (row.name === fighter1) fighter1Data.push(row);
-      if (row.name === fighter2) fighter2Data.push(row);
+      // Check if this row matches fighter1
+      if (row.name && row.name.trim().toLowerCase() === fighter1.toLowerCase()) {
+        fighter1Data.push(row);
+        console.log(`Found Fighter 1: ${row.name}`);
+      }
+      
+      // Check if this row matches fighter2
+      if (row.name && row.name.trim().toLowerCase() === fighter2.toLowerCase()) {
+        fighter2Data.push(row);
+        console.log(`Found Fighter 2: ${row.name}`);
+      }
     })
-    .on('end', () => {
+    .on('end', async () => {
       console.log('Finished reading CSV');
       console.log('Fighter1 Data:', fighter1Data[0]);
       console.log('Fighter2 Data:', fighter2Data[0]);
@@ -113,8 +122,13 @@ app.post('/predict', (req, res) => {
       console.log('Computed features:', features);
 
       res.json({ success: true, features });
+    
+      const mlResponse = await axios.post('http://localhost:8000/predict-array', { features });
+      console.log(mlResponse.data);
+
     });
 });
+
 
 
 app.listen(PORT, () => {

@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = "http://localhost:8000/predict"
+url = "http://localhost:8000/predict-array"
 data ={
   "features" : [
     # Fighter 1 (Alexandre F) base features
