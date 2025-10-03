@@ -3,14 +3,20 @@ from pydantic import BaseModel
 import joblib
 import numpy as np
 import os
+import mysql.connector
+from mysql.connector import Error
 
 # Initialize FastAPI app
 app = FastAPI(title="UFC Fight Prediction API", version="1.0.0")
 
+# -------------------------
 # Model configuration
-model_path = os.path.join(os.path.dirname(__file__), "..", "..", "ml_service", "models", "best_fight_model.pkl")
+# -------------------------
+model_path = os.path.join(
+    os.path.dirname(__file__),
+    "..", "..", "ml_service", "models", "best_fight_model.pkl"
+)
 
-# Load model on startup
 model = None
 
 @app.on_event("startup")
@@ -23,7 +29,39 @@ async def load_model():
         print(f"Error loading model: {e}")
         model = None
 
-# Simple request/response models
+# -------------------------
+# MySQL / Cloud SQL config
+# -------------------------
+DB_HOST = os.getenv("DB_HOST")           # Cloud SQL public IP
+DB_USER = os.getenv("DB_USER")           # MySQL username
+DB_PASSWORD = os.getenv("DB_PASSWORD")   # MySQL password
+DB_NAME = os.getenv("DB_NAME")           # Database name
+DB_PORT = int(os.getenv("DB_PORT", 3306))
+
+def log_prediction_to_db(features: list[float], prediction: int, confidence: float):
+    """Logs prediction to Cloud SQL"""
+    try:
+        conn = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            port=DB_PORT
+        )
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO predictions (features, prediction, confidence) VALUES (%s, %s, %s)",
+            (str(features), int(prediction), float(confidence))
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Error as e:
+        print(f"Error logging prediction to DB: {e}")
+
+# -------------------------
+# Request/response models
+# -------------------------
 class PredictionRequest(BaseModel):
     features: list[float]  # 33 pre-processed features
 
@@ -33,7 +71,9 @@ class PredictionResponse(BaseModel):
     confidence: float
     probabilities: list[float]
 
+# -------------------------
 # API Endpoints
+# -------------------------
 @app.get("/")
 async def root():
     return {"message": "UFC Fight Prediction API", "version": "1.0.0"}
@@ -71,6 +111,9 @@ async def predict(request: PredictionRequest):
         # Get confidence (probability of predicted class)
         confidence = probabilities[prediction]
         
+        # Optional: log prediction to Cloud SQL
+        log_prediction_to_db(request.features, prediction, confidence)
+        
         return PredictionResponse(
             prediction=int(prediction),
             winner="Fighter 1 wins" if prediction == 1 else "Fighter 2 wins",
@@ -81,6 +124,9 @@ async def predict(request: PredictionRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Prediction failed: {str(e)}")
 
+# -------------------------
+# Run the server
+# -------------------------
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
