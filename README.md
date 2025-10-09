@@ -1,64 +1,21 @@
-# ML Webapp
+## 🥊 FightPredict UFC 320 Predictions
 
-Monorepo with a React frontend, Express API, and Python FastAPI ML service (XGBoost).
+Below are the prediction results and interface screenshots from the FightPredict web app for UFC 320.
 
-## Structure
-- frontend/ — Vite + React app
-- api/ — Express server proxying to ML service
-- ml_service/ — FastAPI service with training and inference
-- infra/ — docker-compose and deployment scaffolding
+### Main Card and Predictions
 
-## Quickstart (Docker)
-1. From `infra/`, run:
-   ```bash
-   docker compose up --build
-   ```
-2. Open frontend at http://localhost:5173
-3. The API is at http://localhost:5000 and ML service at http://localhost:8000
+<p align="center">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 155643.png" alt="FightPredict UFC 320 Screenshot 1" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 155839.png" alt="FightPredict UFC 320 Screenshot 2" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 155908.png" alt="FightPredict UFC 320 Screenshot 3" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 155929.png" alt="FightPredict UFC 320 Screenshot 4" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 160005.png" alt="FightPredict UFC 320 Screenshot 5" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 160046.png" alt="FightPredict UFC 320 Screenshot 6" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 160134.png" alt="FightPredict UFC 320 Screenshot 7" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 160159.png" alt="FightPredict UFC 320 Screenshot 8" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 160223.png" alt="FightPredict UFC 320 Screenshot 9" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 160245.png" alt="FightPredict UFC 320 Screenshot 10" width="700">
+  <img src="assets/predictions/ufc 320/Screenshot 2025-10-09 160325.png" alt="FightPredict UFC 320 Screenshot 11" width="700">
+</p>
 
-## Local Dev
-- Frontend:
-  ```bash
-  cd frontend && npm install && npm run dev
-  ```
-- API:
-  ```bash
-  cd api && npm install && npm run dev
-  ```
-- ML Service:
-  ```bash
-  cd ml_service
-  pip install -r requirements.txt
-  uvicorn src.app:app --reload --port 8000
-  ```
-
-## Train Model
-Place your dataset at `ml_service/data/dataset.csv` with features in columns and target as the last column.
-```bash
-cd ml_service
-python -m src.train
-```
-Artifacts saved to `ml_service/models/`.
-
-## Predict API
-- POST `http://localhost:8000/predict` body:
-  ```json
-  { "features": [1.0, 2.0, 3.0] }
-  ```
-- Through Express: POST `http://localhost:5000/api/predict` with same body.
-
-## Notes
-- Ensure the same scaler used during training is saved and loaded for inference.
-- Update XGBoost/scikit-learn versions if needed for your environment.
-
-## Machine learning accuracy report
-[EVAL-ONLY] Test accuracy: 0.5415
-              precision    recall  f1-score   support
-
-           0       0.54      0.54      0.54       793
-           1       0.54      0.54      0.54       797
-
-    accuracy                           0.54      1590
-   macro avg       0.54      0.54      0.54      1590
-weighted avg       0.54      0.54      0.54      1590
 
