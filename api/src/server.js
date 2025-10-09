@@ -136,6 +136,20 @@ app.post('/predict', async (req, res) => {
     
 });
 
+// Fetch all fighter names
+app.get('/api/fighters', async (_req, res) => {
+  try {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query('SELECT name FROM fighters');
+    connection.release();
+    const fighterNames = rows.map(r => r.name);
+    res.json(fighterNames);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch fighters' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log('Server is running on port', PORT);
 });
