@@ -3,7 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import mysql from 'mysql2/promise'; // use promise version for async/await
 import 'dotenv/config';  // automatically loads .env
-
+import axios from 'axios';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -122,12 +122,18 @@ app.post('/predict', async (req, res) => {
     console.log('Computed features:', features);
 
     // Return features for now; you can integrate your ML model call here
-    res.json({ success: true, features });
+    // res.json({ success: true, features });
 
+    const mlResponse = await axios.post('http://localhost:8000/predict-array', { features });
+      console.log(mlResponse.data);
+
+    res.json({ prediction: mlResponse.data });
   } catch (error) {
     console.error('Error querying DB:', error);
     res.status(500).json({ success: false, error: 'Database query failed' });
   }
+
+    
 });
 
 app.listen(PORT, () => {
