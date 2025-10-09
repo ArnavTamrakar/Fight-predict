@@ -136,7 +136,7 @@ app.post('/predict', async (req, res) => {
     
 });
 
-// Fetch all fighter names
+// Fetch all fighter names to be sent to the frontend for autocomplete
 app.get('/api/fighters', async (_req, res) => {
   try {
     const connection = await pool.getConnection();
