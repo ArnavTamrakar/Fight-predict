@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import FighterInput from './components/fighterinput';
 import './App.css';
+import Header from './components/header';
 
 function App() {
   const [fighter1, setFighter1] = useState('');
@@ -19,25 +20,29 @@ function App() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-    <FighterInput label="Fighter 1" onSelect={setFighter1} />
-    <FighterInput label="Fighter 2" onSelect={setFighter2} />
-    <button type="submit">Predict</button>
+    <div>
+      <Header />
+      <div className="Prediction-Form">
+        <form onSubmit={handleSubmit}>
+          <FighterInput label="Fighter 1" onSelect={setFighter1} />
+          <FighterInput label="Fighter 2" onSelect={setFighter2} />
+          <button type="submit">Predict</button>
+        </form>
 
-    {result && (
-      <div className='results'>
-        <h3>Fight Prediction</h3>
-        <p>{fighter1} win Probability: {(result.prediction.probabilities[0] * 100).toFixed(1)}%</p>
-        <p>{fighter2} win Probability: {(result.prediction.probabilities[1] * 100).toFixed(1)}%</p>
-        <p>
-          Winner: <strong>
-            {result.prediction.winner === "Fighter 1" ? fighter1 : fighter2}
-          </strong>
-        </p>
+        {result && (
+          <div className='results'>
+            <h3>Fight Prediction</h3>
+            <p>{fighter1} win Probability: {(result.prediction.probabilities[0] * 100).toFixed(1)}%</p>
+            <p>{fighter2} win Probability: {(result.prediction.probabilities[1] * 100).toFixed(1)}%</p>
+            <p>
+              Winner: <strong>
+                {result.prediction.winner === "Fighter 1" ? fighter1 : fighter2}
+              </strong>
+            </p>
+          </div>
+        )}
       </div>
-    )}
-  </form>
+    </div>
   );
 }
-
 export default App;
