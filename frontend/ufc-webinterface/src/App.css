@@ -15,7 +15,7 @@ form {
   display: flex;
   flex-direction: column;
   align-items: stretch;  
-  max-width: 3000px;      
+  width: 300px;      
   margin: 60px auto;     
   padding: 40px;
   border: 2px solid #ccc;
@@ -72,4 +72,11 @@ button:hover {
   border-radius: 12px;
   font-size: 18px;
   overflow-x: auto;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  left: 0;
 }

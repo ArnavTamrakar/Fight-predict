@@ -22,6 +22,9 @@ function App() {
   return (
     <div>
       <Header />
+      <div>
+        <h2>Enter the names of the fighters you want to compare</h2>
+      </div>
       <div className="Prediction-Form">
         <form onSubmit={handleSubmit}>
           <FighterInput label="Fighter 1" onSelect={setFighter1} />
@@ -34,11 +37,11 @@ function App() {
             <h3>Fight Prediction</h3>
             <p>{fighter1} win Probability: {(result.prediction.probabilities[0] * 100).toFixed(1)}%</p>
             <p>{fighter2} win Probability: {(result.prediction.probabilities[1] * 100).toFixed(1)}%</p>
-            <p>
+            {/* <p>
               Winner: <strong>
                 {result.prediction.winner === "Fighter 1" ? fighter1 : fighter2}
               </strong>
-            </p>
+            </p> */}
           </div>
         )}
       </div>
