@@ -11,7 +11,66 @@ body {
   align-items: center;    
 }
 
-form {
+/* Center the header and form */
+.Prediction-Form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* Style the form row with VS */
+.Prediction-Form form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 32px;
+  
+}
+
+/* Force wider Material-UI Autocomplete input */
+.MuiAutocomplete-root {
+    width: 340px !important; 
+    min-width: 340px !important;
+    max-width: 100%;
+}
+/* Style the VS text */
+.vs-text {
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+/* Style the Predict button */
+.Prediction-Form button[type="submit"] {
+  background: #009cff;
+  color: white;
+  border: none;
+  border-radius: 2em;
+  padding: 12px 48px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+/* Center the h2 header */
+.Prediction-Form-header {
+  text-align: center;
+  margin-top: 60px;
+  margin-bottom: 40px;
+}
+
+/* Optional: Style results */
+.results {
+  margin-top: 24px;
+  text-align: center;
+}
+/* form {
   display: flex;
   flex-direction: column;
   align-items: stretch;  
@@ -72,7 +131,7 @@ button:hover {
   border-radius: 12px;
   font-size: 18px;
   overflow-x: auto;
-}
+} */
 
 header {
   position: fixed;

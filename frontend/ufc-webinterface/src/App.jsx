@@ -22,16 +22,21 @@ function App() {
   return (
     <div>
       <Header />
-      <div>
-        <h2>Enter the names of the fighters you want to compare</h2>
-      </div>
       <div className="Prediction-Form">
-        <form onSubmit={handleSubmit}>
-          <FighterInput label="Fighter 1" onSelect={setFighter1} />
-          <FighterInput label="Fighter 2" onSelect={setFighter2} />
-          <button type="submit">Predict</button>
-        </form>
+        <div className="Prediction-Form-header">
+          <h2>Enter the names of the fighters you want to compare</h2>
+        </div>
+        <div className="Prediction-Form">
+          <form onSubmit={handleSubmit}>
+            <div className="form-row">
+              <FighterInput label="Fighter 1" onSelect={setFighter1} />
+              <span className="vs-text">VS</span>
+              <FighterInput label="Fighter 2" onSelect={setFighter2} />
+            </div>
+            <button type="submit">Predict</button>
+          </form>
 
+        </div>
         {result && (
           <div className='results'>
             <h3>Fight Prediction</h3>
