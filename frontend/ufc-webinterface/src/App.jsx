@@ -38,17 +38,10 @@ function App() {
 
         </div>
         {result && (
-          <div className='results'>
-            <h3>Fight Prediction</h3>
-            <p>{fighter1} win Probability: {(result.prediction.probabilities[0] * 100).toFixed(1)}%</p>
-            <p>{fighter2} win Probability: {(result.prediction.probabilities[1] * 100).toFixed(1)}%</p>
-            {/* <p>
-              Winner: <strong>
-                {result.prediction.winner === "Fighter 1" ? fighter1 : fighter2}
-              </strong>
-            </p> */}
-          </div>
-        )}
+        <div className="result">
+          <pre>{JSON.stringify(result, null, 2)}</pre>
+        </div>
+      )}
       </div>
     </div>
   );
