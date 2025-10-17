@@ -168,18 +168,18 @@ print("\nSummary (CV mean ± std | Test acc):")
 for name in models.keys():
     print(f"- {name}: {cv_results[name]['cv_mean']:.4f} ± {cv_results[name]['cv_std']:.4f} | {test_results[name]:.4f}")
 
-# Save best by CV mean
-best_name = max(cv_results.keys(), key=lambda k: cv_results[k]["cv_mean"])
-best_model = fitted_models[best_name]
-BEST_PATH = ROOT / "models" / "best_fight_model.pkl"
-joblib.dump(best_model, str(BEST_PATH))
-print(f"\nSaved best model ({best_name}) to {BEST_PATH}")
+# # Save best by CV mean
+# best_name = max(cv_results.keys(), key=lambda k: cv_results[k]["cv_mean"])
+# best_model = fitted_models[best_name]
+# BEST_PATH = ROOT / "models" / "best_fight_model.pkl"
+# joblib.dump(best_model, str(BEST_PATH))
+# print(f"\nSaved best model ({best_name}) to {BEST_PATH}")
 
-# Save trained model to same project dir
-if hasattr(fitted_models.get("XGBoost"), "feature_importances_"):
-    importances = fitted_models["XGBoost"].feature_importances_
-    feat_names = X.columns.tolist()
-    sorted_pairs = sorted(zip(feat_names, importances), key=lambda t: t[1], reverse=True)
-    print("\nTop 20 XGBoost feature importances (desc):")
-    for name, imp in sorted_pairs[:20]:
-        print(f"{name}: {imp:.6f}")
+# # Save trained model to same project dir
+# if hasattr(fitted_models.get("XGBoost"), "feature_importances_"):
+#     importances = fitted_models["XGBoost"].feature_importances_
+#     feat_names = X.columns.tolist()
+#     sorted_pairs = sorted(zip(feat_names, importances), key=lambda t: t[1], reverse=True)
+#     print("\nTop 20 XGBoost feature importances (desc):")
+#     for name, imp in sorted_pairs[:20]:
+#         print(f"{name}: {imp:.6f}")
