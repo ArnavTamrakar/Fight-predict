@@ -7,41 +7,93 @@ function App() {
   const [fighter1, setFighter1] = useState('');
   const [fighter2, setFighter2] = useState('');
   const [result, setResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const res = await fetch('http://localhost:5000/predict', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fighter1, fighter2 })
-    });
-    const data = await res.json();
-    setResult(data);
+    setIsLoading(true);
+    try {
+      const res = await fetch('http://localhost:5000/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fighter1, fighter2 })
+      });
+      const data = await res.json();
+      setResult(data);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div>
+    <div className="app">
       <Header />
-      <div className="Prediction-Form">
-        <div className="Prediction-Form-header">
-          <h2>Enter the names of the fighters you want to compare</h2>
+      <div className="main-container">
+        <div className="hero-section">
+          <h1 className="hero-title">FightPredict</h1>
+          <p className="hero-subtitle">Predict the outcome of UFC fights using advanced machine learning</p>
         </div>
-        <div className="Prediction-Form">
-          <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <FighterInput label="Fighter 1" onSelect={setFighter1} />
-              <span className="vs-text">VS</span>
-              <FighterInput label="Fighter 2" onSelect={setFighter2} />
+        
+        <div className="prediction-card">
+          <div className="card-header">
+            <h2>Select Fighters</h2>
+            <p>Choose two fighters to see the prediction</p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="prediction-form">
+            <div className="fighters-container">
+              <div className="fighter-input-wrapper">
+                <FighterInput label="Fighter 1" onSelect={setFighter1} />
+              </div>
+              
+              <div className="vs-container">
+                <span className="vs-text">VS</span>
+              </div>
+              
+              <div className="fighter-input-wrapper">
+                <FighterInput label="Fighter 2" onSelect={setFighter2} />
+              </div>
             </div>
-            <button type="submit">Predict</button>
+            
+            <button 
+              type="submit" 
+              className={`predict-button ${isLoading ? 'loading' : ''}`}
+              disabled={!fighter1 || !fighter2 || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className="spinner"></div>
+                  Predicting...
+                </>
+              ) : (
+                'Predict Winner'
+              )}
+            </button>
           </form>
 
+          {result && (
+            <div className="result-container">
+              <div className="result-card">
+                <h3>Prediction Result</h3>
+                <div className="result-content">
+                  <div className="winner-info">
+                    <div className="winner-name">
+                      {result.winner || 'Winner'}
+                    </div>
+                    <div className="confidence-score">
+                      Confidence: {result.confidence ? `${(result.confidence * 100).toFixed(1)}%` : 'N/A'}
+                    </div>
+                  </div>
+                  <div className="detailed-results">
+                    <pre>{JSON.stringify(result, null, 2)}</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        {result && (
-        <div className="result">
-          <pre>{JSON.stringify(result, null, 2)}</pre>
-        </div>
-      )}
       </div>
     </div>
   );

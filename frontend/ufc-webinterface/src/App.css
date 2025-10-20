@@ -1,141 +1,366 @@
+/* Modern UFC Fight Predictor Styles */
 
-body, html {
-  height: 100%;
-  margin: 0;
-  font-family: Arial, sans-serif;
+.app {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
-body {
-  display: flex;
-  justify-content: center; 
-  align-items: center;    
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-/* Center the header and form */
-.Prediction-Form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
-}
-
-/* Style the form row with VS */
-.Prediction-Form form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.form-row {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  margin-bottom: 32px;
-  
-}
-
-/* Force wider Material-UI Autocomplete input */
-.MuiAutocomplete-root {
-    width: 340px !important; 
-    min-width: 340px !important;
-    max-width: 100%;
-}
-/* Style the VS text */
-.vs-text {
-  font-size: 2rem;
-  font-weight: 500;
-}
-
-/* Style the Predict button */
-.Prediction-Form button[type="submit"] {
-  background: #009cff;
-  color: white;
-  border: none;
-  border-radius: 2em;
-  padding: 12px 48px;
-  font-size: 1.3rem;
-  cursor: pointer;
-  margin-bottom: 24px;
-}
-
-/* Center the h2 header */
-.Prediction-Form-header {
+/* Hero Section */
+.hero-section {
   text-align: center;
-  margin-top: 60px;
+  padding: 80px 0 60px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 20px;
+  margin: 20px 0 40px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin: 0 0 20px;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+
+/* Prediction Card */
+.prediction-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 8px;
+  padding: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.prediction-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+}
+
+.card-header {
+  text-align: center;
   margin-bottom: 40px;
 }
 
-/* Optional: Style results */
-.results {
-  margin-top: 24px;
-  text-align: center;
+.card-header h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: #ffffff;
 }
-/* form {
+
+.card-header p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 300;
+}
+
+/* Prediction Form */
+.prediction-form {
   display: flex;
   flex-direction: column;
-  align-items: stretch;  
-  width: 300px;      
-  margin: 60px auto;     
-  padding: 40px;
-  border: 2px solid #ccc;
-  border-radius: 16px;
-  background-color: #f9f9f9;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  gap: 20px;         
+  align-items: center;
+  gap: 30px;
 }
 
-
-label {
-  font-size: 20px;
-  font-weight: 500;
-  margin-bottom: 5px;
-}
-
-
-input {
+.fighters-container {
+  display: flex;
+  align-items: center;
+  gap: 40px;
   width: 100%;
-  padding: 16px 20px;
-  font-size: 20px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  outline: none;
-  transition: border-color 0.2s;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-input:focus {
-  border-color: #007bff;
+.fighter-input-wrapper {
+  flex: 1;
+  min-width: 300px;
+  max-width: 400px;
 }
 
+/* VS Container */
+.vs-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
-button {
-  padding: 16px 24px;
-  font-size: 20px;
-  border-radius: 12px;
-  border: none;
-  background-color: #007bff;
+.vs-text {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #667eea;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Predict Button */
+.predict-button {
+  background: #667eea;
   color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 18px 50px;
+  font-size: 1.2rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+  justify-content: center;
 }
 
-button:hover {
-  background-color: #0056b3;
+.predict-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+  background: #5a67d8;
 }
 
+.predict-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 
-.results {
-  margin-top: 30px;
-  background-color: white;
-  color: black;
+.predict-button.loading {
+  background: #4a5568;
+}
+
+/* Spinner Animation */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Result Container */
+.result-container {
+  margin-top: 40px;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-radius: 8px;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.result-card h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 20px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.result-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.winner-info {
+  text-align: center;
   padding: 20px;
-  border-radius: 12px;
-  font-size: 18px;
-  overflow-x: auto;
-} */
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  left: 0;
+.winner-name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #6bcf7f;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.confidence-score {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.detailed-results {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.detailed-results pre {
+  color: #e2e8f0;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Material-UI Overrides */
+.MuiAutocomplete-root {
+  width: 100% !important;
+  min-width: 300px !important;
+  max-width: 400px !important;
+}
+
+.MuiTextField-root {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.MuiOutlinedInput-root {
+  color: #ffffff !important;
+  border-radius: 6px !important;
+}
+
+.MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-width: 2px !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea !important;
+  border-width: 2px !important;
+}
+
+.MuiInputLabel-root {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 500 !important;
+}
+
+.MuiInputLabel-root.Mui-focused {
+  color: #667eea !important;
+}
+
+.MuiAutocomplete-paper {
+  background: rgba(30, 30, 30, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.MuiAutocomplete-option {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.MuiAutocomplete-option:hover {
+  background: rgba(102, 126, 234, 0.2) !important;
+}
+
+.MuiAutocomplete-option.Mui-focused {
+  background: rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .prediction-card {
+    padding: 30px 20px;
+  }
+  
+  .fighters-container {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .vs-container {
+    order: 2;
+  }
+  
+  .fighter-input-wrapper {
+    min-width: 100%;
+    max-width: 100%;
+  }
+  
+  .vs-circle {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .vs-text {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-container {
+    padding: 0 15px;
+  }
+  
+  .hero-section {
+    padding: 60px 0 40px;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .prediction-card {
+    padding: 20px 15px;
+  }
+  
+  .card-header h2 {
+    font-size: 1.8rem;
+  }
 }
