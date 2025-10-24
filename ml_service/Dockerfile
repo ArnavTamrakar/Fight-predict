@@ -7,14 +7,13 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install
-COPY ml_service/ml/requirements.txt .
+# copy requirements and install
+COPY ml/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your FastAPI app and model
-COPY ml_service/ml ./ml
+# copy your app code and model
+COPY ml ./ml
 
-# Set the working directory where app.py lives
 WORKDIR /app/ml
 
 # Tell Cloud Run what port to expose
