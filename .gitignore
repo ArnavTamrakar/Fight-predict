@@ -100,3 +100,7 @@ coverage.xml
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# deployment dir
+model_service/
+ml_service/
