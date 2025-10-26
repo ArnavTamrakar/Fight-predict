@@ -1,14 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import mysql from 'mysql2/promise'; // use promise version for async/await
-import 'dotenv/config';  // automatically loads .env
+import mysql from 'mysql2/promise';
+import 'dotenv/config';
 import axios from 'axios';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
-app.use(cors());
+// Use hosted model URL in prod, fallback to local in dev
+const MODEL_URL = process.env.MODEL_URL || 'http://localhost:8000';
+
+app.use(cors()); // tighten later if you like
 app.use(morgan('dev'));
 app.use(express.json());
 
@@ -16,15 +19,15 @@ app.use(express.json());
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  password: process.env.DB_PASSWORD,         // from Secret Manager in Cloud Run
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
+  port: Number(process.env.DB_PORT) || 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
 
-// Helper functions
+// Helpers
 function parseRecord(recordStr) {
   const cleanRecord = recordStr.replace(/\s*\(.*\)/, '');
   const [wins, losses, draws] = cleanRecord.split('-').map(Number);
@@ -40,18 +43,24 @@ function calculateAge(dobStr) {
 }
 
 // Health check
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => res.json({ status: 'ok', modelUrl: MODEL_URL }));
 
-// Predict endpoint
+// Predict
 app.post('/predict', async (req, res) => {
   const { fighter1, fighter2 } = req.body;
 
   try {
     const connection = await pool.getConnection();
 
-    // Query fighter data from DB
-    const [f1Rows] = await connection.query('SELECT * FROM fighters WHERE LOWER(name) = ?', [fighter1.toLowerCase()]);
-    const [f2Rows] = await connection.query('SELECT * FROM fighters WHERE LOWER(name) = ?', [fighter2.toLowerCase()]);
+    // Query fighter data
+    const [f1Rows] = await connection.query(
+      'SELECT * FROM fighters WHERE LOWER(name) = ?',
+      [String(fighter1 || '').toLowerCase()]
+    );
+    const [f2Rows] = await connection.query(
+      'SELECT * FROM fighters WHERE LOWER(name) = ?',
+      [String(fighter2 || '').toLowerCase()]
+    );
 
     connection.release();
 
@@ -119,37 +128,34 @@ app.post('/predict', async (req, res) => {
       tdDefDiff
     ];
 
-    console.log('Computed features:', features);
+    console.log('Using MODEL_URL:', MODEL_URL);
+    console.log('Computed features length:', features.length);
 
-    // Return features for now; you can integrate your ML model call here
-    // res.json({ success: true, features });
+    // Call the model service
+    const mlResponse = await axios.post(`${MODEL_URL}/predict-array`, { features });
 
-    const mlResponse = await axios.post('http://localhost:8000/predict-array', { features });
-      console.log(mlResponse.data);
-
+    // Keep your current response shape so the frontend does not change
     res.json({ prediction: mlResponse.data });
   } catch (error) {
-    console.error('Error querying DB:', error);
+    console.error('Error in /predict:', error?.response?.data || error?.message || error);
     res.status(500).json({ success: false, error: 'Database query failed' });
   }
-
-    
 });
 
-// Fetch all fighter names to be sent to the frontend for autocomplete
+// Fighters list for autocomplete
 app.get('/api/fighters', async (_req, res) => {
   try {
     const connection = await pool.getConnection();
     const [rows] = await connection.query('SELECT name FROM fighters');
     connection.release();
-    const fighterNames = rows.map(r => r.name);
-    res.json(fighterNames);
+    res.json(rows.map(r => r.name));
   } catch (err) {
-    console.error(err);
+    console.error('Error in /api/fighters:', err);
     res.status(500).json({ error: 'Failed to fetch fighters' });
   }
 });
 
 app.listen(PORT, () => {
   console.log('Server is running on port', PORT);
+  console.log('MODEL_URL:', MODEL_URL);
 });
