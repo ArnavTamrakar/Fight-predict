@@ -19,7 +19,7 @@ app.use(express.json());
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,         // from Secret Manager in Cloud Run
+  password: process.env.DB_PASSWORD,        
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT) || 3306,
   waitForConnections: true,
@@ -41,6 +41,23 @@ function calculateAge(dobStr) {
   const diffMs = Date.now() - birthDate.getTime();
   return Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365.25));
 }
+// temporary health check route
+app.get("/debug/db", async (_req, res) => {
+  try {
+    const c = await pool.getConnection();
+    const [r] = await c.query("SELECT 1 AS ok");
+    c.release();
+    res.json({ ok: true, result: r });
+  } catch (e) {
+    res.status(500).json({
+      ok: false,
+      error: String(e),
+      code: e.code,
+      errno: e.errno
+    });
+  }
+});
+
 
 // Health check
 app.get('/health', (_req, res) => res.json({ status: 'ok', modelUrl: MODEL_URL }));
