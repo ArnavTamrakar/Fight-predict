@@ -27,7 +27,7 @@ app.add_middleware(
 model = None
 
 # Path to your model
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent  # points to ml_service
 MODEL_PATH = ROOT / "models" / "best_fight_model.pkl"
 
 def load_model():

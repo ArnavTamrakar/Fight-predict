@@ -1,9 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import mysql from 'mysql2/promise';
-import 'dotenv/config';
+import csv from 'csv-parser';
+import fs from 'fs';
 import axios from 'axios';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import 'dotenv/config';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -11,21 +14,16 @@ const PORT = process.env.PORT || 8080;
 // Use hosted model URL in prod, fallback to local in dev
 const MODEL_URL = process.env.MODEL_URL || 'http://localhost:8000';
 
+// ES module safe __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Absolute path to the CSV relative to api/src -> ../../ml_service/data/fighters.csv
+const CSV_PATH = path.join(__dirname, '..', '..', 'ml_service', 'data', 'fighters.csv');
+
 app.use(cors()); // tighten later if you like
 app.use(morgan('dev'));
 app.use(express.json());
-
-// MySQL connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,        
-  database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT) || 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
 
 // Helpers
 function parseRecord(recordStr) {
@@ -41,138 +39,140 @@ function calculateAge(dobStr) {
   const diffMs = Date.now() - birthDate.getTime();
   return Math.floor(diffMs / (1000 * 60 * 60 * 24 * 365.25));
 }
-// temporary health check route
-app.get("/debug/db", async (_req, res) => {
-  try {
-    const c = await pool.getConnection();
-    const [r] = await c.query("SELECT 1 AS ok");
-    c.release();
-    res.json({ ok: true, result: r });
-  } catch (e) {
-    res.status(500).json({
-      ok: false,
-      error: String(e),
-      code: e.code,
-      errno: e.errno
-    });
-  }
-});
-
 
 // Health check
-app.get('/health', (_req, res) => res.json({ status: 'ok', modelUrl: MODEL_URL }));
+app.get('/health', (_req, res) => res.json({ status: 'ok', modelUrl: MODEL_URL, csvPath: CSV_PATH }));
 
 // Predict
-app.post('/predict', async (req, res) => {
+app.post('/predict', (req, res) => {
+  const fighter1Data = [];
+  const fighter2Data = [];
   const { fighter1, fighter2 } = req.body;
 
-  try {
-    const connection = await pool.getConnection();
+  console.log('Received data:', fighter1, fighter2);
+  console.log('Reading CSV at:', CSV_PATH);
 
-    // Query fighter data
-    const [f1Rows] = await connection.query(
-      'SELECT * FROM fighters WHERE LOWER(name) = ?',
-      [String(fighter1 || '').toLowerCase()]
-    );
-    const [f2Rows] = await connection.query(
-      'SELECT * FROM fighters WHERE LOWER(name) = ?',
-      [String(fighter2 || '').toLowerCase()]
-    );
+  // Read CSV asynchronously
+  fs.createReadStream(CSV_PATH)
+    .pipe(csv())
+    .on('data', (row) => {
+      if (row.name && row.name.trim().toLowerCase() === fighter1.toLowerCase()) {
+        fighter1Data.push(row);
+        console.log(`Found Fighter 1: ${row.name}`);
+      }
+      if (row.name && row.name.trim().toLowerCase() === fighter2.toLowerCase()) {
+        fighter2Data.push(row);
+        console.log(`Found Fighter 2: ${row.name}`);
+      }
+    })
+    .on('end', async () => {
+      console.log('Finished reading CSV');
+      console.log('Fighter1 Data:', fighter1Data[0]);
+      console.log('Fighter2 Data:', fighter2Data[0]);
 
-    connection.release();
+      if (!fighter1Data[0] || !fighter2Data[0]) {
+        return res.status(404).json({ success: false, error: 'Fighter data not found' });
+      }
 
-    if (!f1Rows[0] || !f2Rows[0]) {
-      return res.status(404).json({ success: false, error: 'Fighter data not found' });
-    }
+      // Parse records
+      const { wins: f1Wins, losses: f1Losses, draws: f1Draws, nc: f1NC } = parseRecord(fighter1Data[0].record);
+      const { wins: f2Wins, losses: f2Losses, draws: f2Draws, nc: f2NC } = parseRecord(fighter2Data[0].record);
 
-    const fighter1Data = f1Rows[0];
-    const fighter2Data = f2Rows[0];
+      // Compute features
+      const f1StrAcc = parseFloat(fighter1Data[0].strAcc) / 100;
+      const f2StrAcc = parseFloat(fighter2Data[0].strAcc) / 100;
+      const f1TdSuccess = parseFloat(fighter1Data[0].tdAvg) * (parseFloat(fighter1Data[0].tdAcc) / 100);
+      const f2TdSuccess = parseFloat(fighter2Data[0].tdAvg) * (parseFloat(fighter2Data[0].tdAcc) / 100);
+      const f1Age = calculateAge(fighter1Data[0].DoB);
+      const f2Age = calculateAge(fighter2Data[0].DoB);
 
-    // Parse records
-    const { wins: f1Wins, losses: f1Losses, draws: f1Draws, nc: f1NC } = parseRecord(fighter1Data.record);
-    const { wins: f2Wins, losses: f2Losses, draws: f2Draws, nc: f2NC } = parseRecord(fighter2Data.record);
+      // Engineered features
+      const sigStrikeDiff = f1StrAcc - f2StrAcc;
+      const tdSuccessDiff = f1TdSuccess - f2TdSuccess;
+      const ageDiff = f1Age - f2Age;
+      const weightDiff = parseFloat(fighter1Data[0].weight) - parseFloat(fighter2Data[0].weight);
+      const reachDiff = parseFloat(fighter1Data[0].reach) - parseFloat(fighter2Data[0].reach);
+      const stanceMatchup = fighter1Data[0].stance === fighter2Data[0].stance ? 0 : 1;
+      const tdDefDiff = (parseFloat(fighter1Data[0].tdDef) / 100) - (parseFloat(fighter2Data[0].tdDef) / 100);
 
-    // Compute features
-    const f1StrAcc = parseFloat(fighter1Data.strAcc) / 100;
-    const f2StrAcc = parseFloat(fighter2Data.strAcc) / 100;
-    const f1TdSuccess = parseFloat(fighter1Data.tdAvg) * (parseFloat(fighter1Data.tdAcc) / 100);
-    const f2TdSuccess = parseFloat(fighter2Data.tdAvg) * (parseFloat(fighter2Data.tdAcc) / 100);
-    const f1Age = calculateAge(fighter1Data.DoB);
-    const f2Age = calculateAge(fighter2Data.DoB);
+      const features = [
+        f1StrAcc,
+        parseFloat(fighter1Data[0].SLpM),
+        f2StrAcc,
+        parseFloat(fighter2Data[0].SLpM),
+        parseFloat(fighter1Data[0].tdAvg),
+        f1TdSuccess,
+        parseFloat(fighter2Data[0].tdAvg),
+        f2TdSuccess,
+        parseFloat(fighter1Data[0].tdAvg),
+        parseFloat(fighter1Data[0].tdDef) / 100,
+        parseFloat(fighter2Data[0].tdAvg),
+        parseFloat(fighter2Data[0].tdDef) / 100,
+        parseFloat(fighter1Data[0].weight),
+        parseFloat(fighter2Data[0].weight),
+        f1Age,
+        f2Age,
+        f1Wins,
+        f1Losses,
+        f1Draws,
+        f1NC,
+        f2Wins,
+        f2Losses,
+        f2Draws,
+        f2NC,
+        sigStrikeDiff,
+        f1TdSuccess,
+        f2TdSuccess,
+        tdSuccessDiff,
+        ageDiff,
+        weightDiff,
+        reachDiff,
+        stanceMatchup,
+        tdDefDiff
+      ];
 
-    // Engineered features
-    const sigStrikeDiff = f1StrAcc - f2StrAcc;
-    const tdSuccessDiff = f1TdSuccess - f2TdSuccess;
-    const ageDiff = f1Age - f2Age;
-    const weightDiff = parseFloat(fighter1Data.weight) - parseFloat(fighter2Data.weight);
-    const reachDiff = parseFloat(fighter1Data.reach) - parseFloat(fighter2Data.reach);
-    const stanceMatchup = fighter1Data.stance === fighter2Data.stance ? 0 : 1;
-    const tdDefDiff = (parseFloat(fighter1Data.tdDef) / 100) - (parseFloat(fighter2Data.tdDef) / 100);
+      console.log('Using MODEL_URL:', MODEL_URL);
+      console.log('Computed features length:', features.length);
 
-    const features = [
-      f1StrAcc,
-      parseFloat(fighter1Data.SLpM),
-      f2StrAcc,
-      parseFloat(fighter2Data.SLpM),
-      parseFloat(fighter1Data.tdAvg),
-      f1TdSuccess,
-      parseFloat(fighter2Data.tdAvg),
-      f2TdSuccess,
-      parseFloat(fighter1Data.tdAvg),
-      parseFloat(fighter1Data.tdDef) / 100,
-      parseFloat(fighter2Data.tdAvg),
-      parseFloat(fighter2Data.tdDef) / 100,
-      parseFloat(fighter1Data.weight),
-      parseFloat(fighter2Data.weight),
-      f1Age,
-      f2Age,
-      f1Wins,
-      f1Losses,
-      f1Draws,
-      f1NC,
-      f2Wins,
-      f2Losses,
-      f2Draws,
-      f2NC,
-      sigStrikeDiff,
-      f1TdSuccess,
-      f2TdSuccess,
-      tdSuccessDiff,
-      ageDiff,
-      weightDiff,
-      reachDiff,
-      stanceMatchup,
-      tdDefDiff
-    ];
-
-    console.log('Using MODEL_URL:', MODEL_URL);
-    console.log('Computed features length:', features.length);
-
-    // Call the model service
-    const mlResponse = await axios.post(`${MODEL_URL}/predict-array`, { features });
-
-    // Keep your current response shape so the frontend does not change
-    res.json({ prediction: mlResponse.data });
-  } catch (error) {
-    console.error('Error in /predict:', error?.response?.data || error?.message || error);
-    res.status(500).json({ success: false, error: 'Database query failed' });
-  }
+      try {
+        const mlResponse = await axios.post(`${MODEL_URL}/predict-array`, { features });
+        res.json({ prediction: mlResponse.data });
+      } catch (error) {
+        console.error('Error calling ML model:', error?.response?.data || error?.message || error);
+        res.status(500).json({ success: false, error: 'ML prediction failed' });
+      }
+    })
+    .on('error', (error) => {
+      console.error('Error reading CSV:', error);
+      res.status(500).json({ success: false, error: 'Failed to read fighter data' });
+    });
 });
 
 // Fighters list for autocomplete
-app.get('/api/fighters', async (_req, res) => {
-  try {
-    const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT name FROM fighters');
-    connection.release();
-    res.json(rows.map(r => r.name));
-  } catch (err) {
-    console.error('Error in /api/fighters:', err);
-    res.status(500).json({ error: 'Failed to fetch fighters' });
-  }
+app.get('/api/fighters', (_req, res) => {
+  const fighters = [];
+
+  console.log('Reading CSV at:', CSV_PATH);
+
+  fs.createReadStream(CSV_PATH)
+    .pipe(csv())
+    .on('data', (row) => {
+      if (row.name) {
+        fighters.push(row.name);
+      }
+    })
+    .on('end', () => {
+      console.log(`Loaded ${fighters.length} fighters`);
+      res.json(fighters);
+    })
+    .on('error', (error) => {
+      console.error('Error in /api/fighters:', error);
+      res.status(500).json({ error: 'Failed to fetch fighters' });
+    });
 });
 
 app.listen(PORT, () => {
   console.log('Server is running on port', PORT);
   console.log('MODEL_URL:', MODEL_URL);
+  console.log('CSV_PATH:', CSV_PATH);
 });

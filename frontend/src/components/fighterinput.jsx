@@ -6,7 +6,7 @@ export default function FighterInput({ label, onSelect }) {
   const [fighterNames, setFighterNames] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/fighters')
+    fetch('http://localhost:8080/api/fighters')
       .then(res => res.json())
       .then(data => setFighterNames(data))
       .catch(err => console.error(err));

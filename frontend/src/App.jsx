@@ -9,19 +9,26 @@ function App() {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  
+  const API_BASE = import.meta.env.PROD ? import.meta.env.VITE_API_URL || '' : '';
+
   const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/predict`, {
+      const res = await fetch(`${API_BASE}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fighter1, fighter2 })
+        body: JSON.stringify({ fighter1, fighter2 }),
       });
-      const data = await res.json();
+
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `Request failed with ${res.status}`);
+
+      const data = JSON.parse(text);
       setResult(data);
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (err) {
+      console.error('Predict failed:', err);
     } finally {
       setIsLoading(false);
     }
