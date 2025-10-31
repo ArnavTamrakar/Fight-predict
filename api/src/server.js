@@ -18,9 +18,30 @@ const MODEL_URL = process.env.MODEL_URL || 'http://localhost:8000';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Absolute path to the CSV relative to api/src -> ../../ml_service/data/fighters.csv
-const CSV_PATH = path.join(__dirname, '..', '..', 'ml_service', 'data', 'fighters.csv');
+// Try multiple possible CSV locations
+const possiblePaths = [
+  path.join(__dirname, '..', '..', 'ml_service', 'data', 'fighters.csv'),
+  path.join(process.cwd(), 'ml_service', 'data', 'fighters.csv'),
+  '/ml_service/data/fighters.csv',
+  path.join(__dirname, 'data', 'fighters.csv')
+];
 
+let CSV_PATH = null;
+for (const p of possiblePaths) {
+  if (fs.existsSync(p)) {
+    CSV_PATH = p;
+    console.log(`✅ Found CSV at: ${p}`);
+    break;
+  } else {
+    console.log(`❌ CSV not found at: ${p}`);
+  }
+}
+
+if (!CSV_PATH) {
+  console.error('🚨 CRITICAL: fighters.csv not found in any expected location!');
+}
+
+// Update CORS to allow your Vercel domain explicitly
 app.use(cors({
   origin: [
     'https://fight-predict.vercel.app',
@@ -29,6 +50,7 @@ app.use(cors({
   ],
   credentials: true
 }));
+
 app.use(morgan('dev'));
 app.use(express.json());
 
