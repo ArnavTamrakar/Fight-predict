@@ -10,7 +10,14 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   
-  const API_BASE = import.meta.env.PROD ? import.meta.env.VITE_API_URL || '' : '';
+   // Environment-based API base URL
+  const API_BASE = import.meta.env.DEV
+    ? 'http://localhost:8080'
+    : import.meta.env.VITE_API_URL;
+
+  if (!import.meta.env.DEV && !API_BASE) {
+    console.error('VITE_API_URL is not set in Vercel');
+  }
 
   const handleSubmit = async e => {
     e.preventDefault();
