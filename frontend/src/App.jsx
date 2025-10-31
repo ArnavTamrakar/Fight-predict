@@ -14,9 +14,6 @@ function App() {
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  
-
-
   if (!import.meta.env.DEV && !API_BASE) {
     console.error('VITE_API_URL is not set in Vercel');
   }
@@ -65,7 +62,7 @@ function App() {
           <form onSubmit={handleSubmit} className="prediction-form">
             <div className="fighters-container">
               <div className="fighter-input-wrapper">
-                <FighterInput label="Fighter 1" onSelect={setFighter1} />
+                <FighterInput label="Fighter 1" onSelect={setFighter1} apiBase={API_BASE} />
               </div>
               
               <div className="vs-container">
@@ -73,7 +70,7 @@ function App() {
               </div>
               
               <div className="fighter-input-wrapper">
-                <FighterInput label="Fighter 2" onSelect={setFighter2} />
+                <FighterInput label="Fighter 2" onSelect={setFighter2} apiBase={API_BASE} />
               </div>
             </div>
             
