@@ -3,6 +3,11 @@ import FighterInput from './components/fighterinput';
 import './App.css';
 import Header from './components/header';
 
+// Environment-based API base URL
+const API_BASE = import.meta.env.DEV
+  ? 'http://localhost:8080'
+  : import.meta.env.VITE_API_URL;
+
 function App() {
   const [fighter1, setFighter1] = useState('');
   const [fighter2, setFighter2] = useState('');
@@ -10,10 +15,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   
-   // Environment-based API base URL
-  const API_BASE = import.meta.env.DEV
-    ? 'http://localhost:8080'
-    : import.meta.env.VITE_API_URL;
+
 
   if (!import.meta.env.DEV && !API_BASE) {
     console.error('VITE_API_URL is not set in Vercel');
