@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 
-export default function FighterInput({ label, onSelect }) {
+export default function FighterInput({ label, onSelect, apiBase }) {
   const [fighterNames, setFighterNames] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/fighters')
+    fetch(`${apiBase}/api/fighters`)
       .then(res => res.json())
       .then(data => setFighterNames(data))
       .catch(err => console.error(err));
-  }, []);
+  }, [apiBase]);
 
   return (
     <Autocomplete
