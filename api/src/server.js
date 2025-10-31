@@ -21,7 +21,14 @@ const __dirname = path.dirname(__filename);
 // Absolute path to the CSV relative to api/src -> ../../ml_service/data/fighters.csv
 const CSV_PATH = path.join(__dirname, '..', '..', 'ml_service', 'data', 'fighters.csv');
 
-app.use(cors()); // tighten later if you like
+app.use(cors({
+  origin: [
+    'https://fight-predict.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 
