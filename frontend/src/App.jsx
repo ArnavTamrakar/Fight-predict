@@ -19,6 +19,10 @@ function App() {
     console.error('VITE_API_URL is not set in Vercel');
   }
 
+  console.log('🔍 Environment:', import.meta.env.MODE);
+  console.log('🔍 API_BASE:', API_BASE);
+  console.log('🔍 VITE_API_URL:', import.meta.env.VITE_API_URL);
+  
   const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
